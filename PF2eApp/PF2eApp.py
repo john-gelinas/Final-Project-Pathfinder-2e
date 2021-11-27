@@ -31,3 +31,4 @@ cur = con.cursor()
 @app.route('/index')
 def index():
     return "Hello, World!"
+
