@@ -5,8 +5,8 @@ from flask import Flask, flash, redirect, render_template, request, session
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from tempfile import mkdtemp
-from PF2eApp.helpers import apology, login_required
-#from flask_session import Session
+from helpers import apology, login_required
+from flask_session import Session
 
 
 # Configure application
@@ -24,11 +24,11 @@ def after_request(response):
     return response
 
 # ~not working becuase flask_session will not import~
-# # Configure session to use filesystem (instead of signed cookies)
-# app.config["SESSION_FILE_DIR"] = mkdtemp()
-# app.config["SESSION_PERMANENT"] = False
-# app.config["SESSION_TYPE"] = "filesystem"
-# Session(app)
+# Configure session to use filesystem (instead of signed cookies)
+app.config["SESSION_FILE_DIR"] = mkdtemp()
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 
 # connect database
