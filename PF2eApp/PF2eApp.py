@@ -1,5 +1,5 @@
 #using base boilerplate code from finance assignment
-
+import os
 import sqlite3
 from flask import Flask, flash, redirect, render_template, request, session
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
@@ -23,18 +23,14 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-# ~not working becuase flask_session will not import~
 # Configure session to use filesystem (instead of signed cookies)
-app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SECRET_KEY"] = os.urandom(16)
+app.config["SESSION_COOKIE_SAMESITE"] = 'Lax'
+# Check Configuration section for more details
+app.config.from_object(__name__)
 Session(app)
-
-
-# connect database
-con = sqlite3.connect('pathfinder.db')
-# create cursor object
-cur = con.cursor()
 
 @app.route('/')
 @app.route('/index')
@@ -44,6 +40,11 @@ def index():
 
 @app.route('/login')
 def login():
+    # connect database
+    con = sqlite3.connect('pathfinder.db')
+    # create cursor object
+    cur = con.cursor()
+    
     # Log user in
 
     # Forget any user_id
@@ -60,17 +61,21 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = cur.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        rows = cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], (request.form.get("password"),)):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
 
+        con.commit()
+        con.close()
+
         # Redirect user to home page
         return redirect("/")
+
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -89,10 +94,19 @@ def logout():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    # connect database
+    con = sqlite3.connect('pathfinder.db', check_same_thread=False)
+    # create cursor object
+    cur = con.cursor()
+
     if request.method == "POST":
         """Register user"""
         # Query database for username to ensure unique
-        rows = cur.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        con = sqlite3.connect('pathfinder.db')
+        cur = con.cursor()
+        cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
+        rows = cur.fetchall()
+        cur.close()
         if len(rows) != 0:
             return apology("username already exists", 400)
 
@@ -107,21 +121,28 @@ def register():
         # insert user data into user table in database
         usernameinsert = request.form.get("username")
         hashinsert = generate_password_hash(request.form.get("password"))
-        cur.execute("INSERT INTO users (username, hash) VALUES (?, ?)", usernameinsert, hashinsert)
+        con = sqlite3.connect('pathfinder.db')
+        cur = con.cursor()
+        cur.execute("INSERT INTO users (username, hash) VALUES (?, ?)", (usernameinsert, hashinsert))
+        cur.close()
 
         # get info about user from table
-        newrows = cur.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        con = sqlite3.connect('pathfinder.db')
+        cur = con.cursor()
+        cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
+        newrows = cur.fetchall()
+        cur.close()
 
         # Remember which user has logged in
         session["user_id"] = newrows[0]["id"]
-        histtable = newrows[0]["username"]+"history"
-        # create table for users stocks
-        cur.execute(
-            "CREATE TABLE ? (StockID INTEGER NOT NULL PRIMARY KEY, StockSymbol VARCHAR(255) NOT NULL UNIQUE, StockAmount INTEGER NOT NULL)", newrows[0]["username"])
-        # create table for user history
-        cur.execute(
-            "CREATE TABLE ? (TransactionID INTEGER NOT NULL PRIMARY KEY, StockSymbol VARCHAR(255) NOT NULL, StockAmount INTEGER NOT NULL, TransactionTime VARCHAR(255) NOT NULL, TransactionType VARCHAR(255) NOT NULL, StockPrice DOUBLE(8, 2) NOT NULL)", histtable)
+        tablename = newrows[0]["username"]+"characters"
+        # create table for users characters
+        con = sqlite3.connect('pathfinder.db')
+        cur = con.cursor()
+        cur.execute("CREATE TABLE ? (name VARCHAR(255), class VARCHAR(255), str VARCHAR(255), dex VARCHAR(255), con VARCHAR(255), int VARCHAR(255), wis VARCHAR(255), cha VARCHAR(255), level VARCHAR(255))", (tablename,))
 
+        con.commit()
+        con.close()
         # Redirect user to home page
         return redirect("/")
     if request.method == "GET":
@@ -138,3 +159,6 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
+
+if __name__ == "__main__":
+    app.run()
