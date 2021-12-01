@@ -1,5 +1,6 @@
 #using base boilerplate code from finance assignment
 import os
+import sys
 import sqlite3
 from flask import Flask, flash, redirect, render_template, request, session
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
@@ -36,22 +37,59 @@ Session(app)
 @app.route('/index')
 @login_required
 def index():
-    return "Hello, World!"
+    user = session["user_id"]
+    return render_template('index.html', user=user)
 
-@app.route('/login')
+@app.route('/characters')
+@login_required
+def characters():
+    user = session["user_id"]
+
+
+    
+    return render_template('characters.html', user=user)
+
+@app.route('/character/<name>', methods=["GET", "POST"])
+def character(name):
+
+    characterdata = name
+    return render_template("viewcharacter.html", characterdata = characterdata)
+
+@app.route('/editcharacter', methods=["GET", "POST"])
+def edit():
+    if request.method == "GET":
+        #display form
+        return render_template("editcharacter.html")
+
+    if request.method == "POST":
+        app.logger.info('post test')    
+        #pass form to db, display character
+        characterdata = dict()
+        characterdata["name"] = request.form.get("name")
+        characterdata["str"] = request.form.get("str")
+        characterdata["dex"] = request.form.get("dex")
+        characterdata["con"] = request.form.get("con")
+        characterdata["int"] = request.form.get("int")
+        characterdata["wis"] = request.form.get("wis")
+        characterdata["cha"] = request.form.get("cha")
+        characterdata["level"] = request.form.get("level")
+
+        return render_template("viewcharacter.html", characterdata = characterdata)
+
+
+@app.route('/login', methods=["GET", "POST"])
 def login():
+    app.logger.info('testing info log')    
     # connect database
     con = sqlite3.connect('pathfinder.db')
     # create cursor object
     cur = con.cursor()
-    
     # Log user in
 
     # Forget any user_id
     session.clear()
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
         # Ensure username was submitted
         if not request.form.get("username"):
             return apology("must provide username", 403)
@@ -59,16 +97,17 @@ def login():
         # Ensure password was submitted
         elif not request.form.get("password"):
             return apology("must provide password", 403)
-
+        app.logger.info('here2')
         # Query database for username
-        rows = cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
+        cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
+        rows = cur.fetchall()
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], (request.form.get("password"),)):
+        if len(rows) != 1 or not check_password_hash(rows[0][2], (request.form.get("password"))):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = rows[0][1]
 
         con.commit()
         con.close()
@@ -124,7 +163,8 @@ def register():
         con = sqlite3.connect('pathfinder.db')
         cur = con.cursor()
         cur.execute("INSERT INTO users (username, hash) VALUES (?, ?)", (usernameinsert, hashinsert))
-        cur.close()
+        con.commit()
+        con.close()
 
         # get info about user from table
         con = sqlite3.connect('pathfinder.db')
@@ -134,12 +174,15 @@ def register():
         cur.close()
 
         # Remember which user has logged in
-        session["user_id"] = newrows[0]["id"]
-        tablename = newrows[0]["username"]+"characters"
+        session["user_id"] = newrows[0][1]
+        tablename = newrows[0][1]+"characters"
         # create table for users characters
         con = sqlite3.connect('pathfinder.db')
         cur = con.cursor()
-        cur.execute("CREATE TABLE ? (name VARCHAR(255), class VARCHAR(255), str VARCHAR(255), dex VARCHAR(255), con VARCHAR(255), int VARCHAR(255), wis VARCHAR(255), cha VARCHAR(255), level VARCHAR(255))", (tablename,))
+
+        # create query and scrub it using helper function
+        query = "CREATE TABLE {} (name VARCHAR(255), class VARCHAR(255), str VARCHAR(255), dex VARCHAR(255), con VARCHAR(255), int VARCHAR(255), wis VARCHAR(255), cha VARCHAR(255), level VARCHAR(255))".format(tablename)
+        cur.execute(query)
 
         con.commit()
         con.close()

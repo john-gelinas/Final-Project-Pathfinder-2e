@@ -1,10 +1,9 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Apology
+    {{ characterdata.name }}
 {% endblock %}
 
 {% block main %}
-    <h3>Error: {{ error }}</h3>
-    <h4>{{ message }}</h4>
+    <h4> test name: {{ characterdata.name }} </h4>
 {% endblock %}

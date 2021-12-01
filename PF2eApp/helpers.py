@@ -4,17 +4,7 @@ from functools import wraps
 
 def apology(message, code=400):
     """Render message as an apology to user."""
-    def escape(s):
-        """
-        Escape special characters.
-
-        https://github.com/jacebrowning/memegen#special-characters
-        """
-        for old, new in [("-", "--"), (" ", "-"), ("_", "__"), ("?", "~q"),
-                         ("%", "~p"), ("#", "~h"), ("/", "~s"), ("\"", "''")]:
-            s = s.replace(old, new)
-        return s
-    return render_template("apology.html", top=code, bottom=escape(message)), code
+    return render_template("apology.html", error = code, message = message)
 
 def login_required(f):
     """
@@ -28,3 +18,7 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+def scrub(table_name):
+    return ''.join( chr for chr in table_name if chr.isalnum() )
+# From Donald Miner for scrubbing special characters from https://stackoverflow.com/questions/3247183/variable-table-name-in-sqlite
