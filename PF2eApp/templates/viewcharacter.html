@@ -5,5 +5,7 @@
 {% endblock %}
 
 {% block main %}
-    <h4> test name: {{ characterdata.name }} </h4>
+    {% for field in fields %}
+        <h4>{{ field.name }}: {{ field.value }}</h4>
+    {% endfor %}
 {% endblock %}

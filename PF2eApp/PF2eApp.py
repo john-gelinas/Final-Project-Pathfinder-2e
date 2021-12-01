@@ -6,7 +6,7 @@ from flask import Flask, flash, redirect, render_template, request, session
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from tempfile import mkdtemp
-from helpers import apology, login_required
+from helpers import apology, login_required, scrub, sqlselect
 from flask_session import Session
 
 
@@ -46,20 +46,29 @@ def characters():
     user = session["user_id"]
 
 
-    
+
     return render_template('characters.html', user=user)
 
 @app.route('/character/<name>', methods=["GET", "POST"])
 def character(name):
+    if request.method == "GET":
+        # get character data from database
+        user = session["user_id"]
+        tablename = user + "characters"
+        query = "SELECT * FROM {} WHERE name = {}}".format(tablename, name)
+        chardata = sqlselect(query)
 
-    characterdata = name
-    return render_template("viewcharacter.html", characterdata = characterdata)
 
-@app.route('/editcharacter', methods=["GET", "POST"])
+        return render_template("viewcharacter.html", characterdata = characterdata)
+
+    if request.method == "POST":
+
+
+@app.route('/newcharacter', methods=["GET", "POST"])
 def edit():
     if request.method == "GET":
         #display form
-        return render_template("editcharacter.html")
+        return render_template("newcharacter.html")
 
     if request.method == "POST":
         app.logger.info('post test')    
@@ -74,7 +83,15 @@ def edit():
         characterdata["cha"] = request.form.get("cha")
         characterdata["level"] = request.form.get("level")
 
-        return render_template("viewcharacter.html", characterdata = characterdata)
+        #add data to database
+        #connect db
+        con = sqlite3.connect('pathfinder.db')
+        cur = con.cursor()
+
+
+
+        charpage = "/character/" + characterdata.name
+        return redirect(charpage)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -101,6 +118,7 @@ def login():
         # Query database for username
         cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
         rows = cur.fetchall()
+        cur.close()
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0][2], (request.form.get("password"))):
@@ -109,7 +127,6 @@ def login():
         # Remember which user has logged in
         session["user_id"] = rows[0][1]
 
-        con.commit()
         con.close()
 
         # Redirect user to home page
@@ -124,28 +141,20 @@ def login():
 @app.route("/logout")
 def logout():
     # Log user out
-
     # Forget any user_id
     session.clear()
-
     # Redirect user to login form
     return redirect("/")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    # connect database
-    con = sqlite3.connect('pathfinder.db', check_same_thread=False)
-    # create cursor object
-    cur = con.cursor()
 
     if request.method == "POST":
         """Register user"""
         # Query database for username to ensure unique
-        con = sqlite3.connect('pathfinder.db')
-        cur = con.cursor()
-        cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
-        rows = cur.fetchall()
-        cur.close()
+        user = request.form.get("username")
+        query = "SELECT * FROM users WHERE username = {}".format(user)
+        rows = sqlselect(query)
         if len(rows) != 0:
             return apology("username already exists", 400)
 
@@ -182,6 +191,7 @@ def register():
 
         # create query and scrub it using helper function
         query = "CREATE TABLE {} (name VARCHAR(255), class VARCHAR(255), str VARCHAR(255), dex VARCHAR(255), con VARCHAR(255), int VARCHAR(255), wis VARCHAR(255), cha VARCHAR(255), level VARCHAR(255))".format(tablename)
+        query = scrub(query)
         cur.execute(query)
 
         con.commit()
