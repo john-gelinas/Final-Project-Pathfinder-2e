@@ -43,10 +43,11 @@ def index():
 @app.route('/characters')
 @login_required
 def characters():
-    user = session["user_id"]
-
 
     if request.method == "GET":
+        user = session["user_id"]
+        user = scrub(user)
+        # get and display characters from db
         return render_template('characters.html', user=user)
 
     
