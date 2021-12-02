@@ -6,7 +6,7 @@ from flask import Flask, flash, redirect, render_template, request, session
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from tempfile import mkdtemp
-from helpers import apology, login_required
+from helpers import apology, login_required, sqlselect, scrub
 from flask_session import Session
 
 
@@ -46,35 +46,64 @@ def characters():
     user = session["user_id"]
 
 
+    if request.method == "GET":
+        return render_template('characters.html', user=user)
+
     
-    return render_template('characters.html', user=user)
 
 @app.route('/character/<name>', methods=["GET", "POST"])
 def character(name):
+    if request.method == "GET":
+        # get character data from database
+        user = session["user_id"]
+        name = scrub(name)
+        user = scrub(user)
+        query = "SELECT id FROM users WHERE username = '{}'".format(user)
+        playerid = sqlselect(query)[0][0]
+        query = "SELECT * FROM characters WHERE name = '{}' AND playerid = {}".format(name, playerid)
+        chardata = sqlselect(query)
 
-    characterdata = name
-    return render_template("viewcharacter.html", characterdata = characterdata)
+        return render_template("viewcharacter.html", characterdata = chardata)
 
-@app.route('/editcharacter', methods=["GET", "POST"])
+    if request.method == "POST":
+        return
+
+
+@app.route('/newcharacter', methods=["GET", "POST"])
 def edit():
     if request.method == "GET":
         #display form
-        return render_template("editcharacter.html")
+        return render_template("newcharacter.html")
 
     if request.method == "POST":
-        app.logger.info('post test')    
+        app.logger.info('post test')
+        user = session["user_id"]
+        user = scrub(user)
+        query = "SELECT id FROM users WHERE username = '{}'".format(user)
+        playerid = sqlselect(query)[0][0]    
         #pass form to db, display character
-        characterdata = dict()
-        characterdata["name"] = request.form.get("name")
-        characterdata["str"] = request.form.get("str")
-        characterdata["dex"] = request.form.get("dex")
-        characterdata["con"] = request.form.get("con")
-        characterdata["int"] = request.form.get("int")
-        characterdata["wis"] = request.form.get("wis")
-        characterdata["cha"] = request.form.get("cha")
-        characterdata["level"] = request.form.get("level")
+        chardata = dict()
+        chardata["name"] = request.form.get("name")
+        chardata["str"] = request.form.get("str")
+        chardata["dex"] = request.form.get("dex")
+        chardata["con"] = request.form.get("con")
+        chardata["int"] = request.form.get("int")
+        chardata["wis"] = request.form.get("wis")
+        chardata["cha"] = request.form.get("cha")
+        chardata["level"] = request.form.get("level")
+        chardata["backstory"] = request.form.get("backstory")
 
-        return render_template("viewcharacter.html", characterdata = characterdata)
+        #add data to database
+        #connect db
+        con = sqlite3.connect('pathfinder.db')
+        cur = con.cursor()
+        cur.execute("INSERT INTO characters (playerid, name, str, dex, con, int, wis, cha, level, backstory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (playerid, chardata["name"], chardata["str"], chardata["dex"], chardata["con"], chardata["int"], chardata["wis"], chardata["cha"], chardata["level"], chardata["backstory"]))
+        con.commit
+        cur.close
+        con.close
+
+        charpage = "/character/" + chardata["name"]
+        return redirect(charpage)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -101,7 +130,8 @@ def login():
         # Query database for username
         cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
         rows = cur.fetchall()
-
+        cur.close()
+        con.close()
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0][2], (request.form.get("password"))):
             return apology("invalid username and/or password", 403)
@@ -109,43 +139,35 @@ def login():
         # Remember which user has logged in
         session["user_id"] = rows[0][1]
 
-        con.commit()
-        con.close()
+
 
         # Redirect user to home page
         return redirect("/")
 
-
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
+    if request.method == "GET":
         return render_template("login.html")
 
 
 @app.route("/logout")
 def logout():
     # Log user out
-
     # Forget any user_id
     session.clear()
-
     # Redirect user to login form
     return redirect("/")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    # connect database
-    con = sqlite3.connect('pathfinder.db', check_same_thread=False)
-    # create cursor object
-    cur = con.cursor()
 
     if request.method == "POST":
         """Register user"""
         # Query database for username to ensure unique
-        con = sqlite3.connect('pathfinder.db')
-        cur = con.cursor()
-        cur.execute("SELECT * FROM users WHERE username = ?", (request.form.get("username"),))
-        rows = cur.fetchall()
-        cur.close()
+        user = request.form.get("username")
+        userscrubbed = scrub(user)
+        if user != userscrubbed:
+            return apology("username may not contain special characters or spaces")
+        query = "SELECT * FROM users WHERE username = '{}'".format(user)
+        rows = sqlselect(query)
         if len(rows) != 0:
             return apology("username already exists", 400)
 
@@ -175,17 +197,7 @@ def register():
 
         # Remember which user has logged in
         session["user_id"] = newrows[0][1]
-        tablename = newrows[0][1]+"characters"
-        # create table for users characters
-        con = sqlite3.connect('pathfinder.db')
-        cur = con.cursor()
 
-        # create query and scrub it using helper function
-        query = "CREATE TABLE {} (name VARCHAR(255), class VARCHAR(255), str VARCHAR(255), dex VARCHAR(255), con VARCHAR(255), int VARCHAR(255), wis VARCHAR(255), cha VARCHAR(255), level VARCHAR(255))".format(tablename)
-        cur.execute(query)
-
-        con.commit()
-        con.close()
         # Redirect user to home page
         return redirect("/")
     if request.method == "GET":
@@ -202,6 +214,3 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
-
-if __name__ == "__main__":
-    app.run()
