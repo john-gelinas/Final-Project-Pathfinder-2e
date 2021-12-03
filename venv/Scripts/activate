@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\jngel\Documents\Code\Final-Project-Pathfinder-2e\PF2eApp\venv"
+VIRTUAL_ENV="D:\jngel\Documents\Code\Final-Project-Pathfinder-2e\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
