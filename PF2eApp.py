@@ -51,7 +51,6 @@ def characters():
         return render_template('characters.html', user=user)
 
     
-
 @app.route('/character/<name>', methods=["GET", "POST"])
 def character(name):
     if request.method == "GET":
@@ -77,7 +76,6 @@ def edit():
         return render_template("newcharacter.html")
 
     if request.method == "POST":
-        app.logger.info('post test')
         user = session["user_id"]
         user = scrub(user)
         query = "SELECT id FROM users WHERE username = '{}'".format(user)
@@ -93,13 +91,13 @@ def edit():
         chardata["cha"] = request.form.get("cha")
         chardata["level"] = request.form.get("level")
         chardata["backstory"] = request.form.get("backstory")
-
+        app.logger.info(chardata["name"])    
         #add data to database
         #connect db
         con = sqlite3.connect('pathfinder.db')
         cur = con.cursor()
         cur.execute("INSERT INTO characters (playerid, name, str, dex, con, int, wis, cha, level, backstory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (playerid, chardata["name"], chardata["str"], chardata["dex"], chardata["con"], chardata["int"], chardata["wis"], chardata["cha"], chardata["level"], chardata["backstory"]))
-        con.commit
+        con.commit()
         cur.close
         con.close
 
@@ -139,8 +137,6 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0][1]
-
-
 
         # Redirect user to home page
         return redirect("/")
