@@ -1,11 +1,25 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    {{ characterdata.name }}
+    {{ chardata.name }}
 {% endblock %}
 
 {% block main %}
-    {% for field in fields %}
-        <h4>{{ field.name }}: {{ field.value }}</h4>
-    {% endfor %}
+
+<table>
+{% for field in chardata %}
+    {% if loop.index > 2 and loop.index < 13 %}
+        <tr>
+            <td>{{ field }}: </td>
+            <td>{{ chardata[field] }}</td>
+            <!-- Add modifiers -->
+            {% if field|length == 3 %}
+            <td>{{ [field, ' Modifier']|join }}: </td>
+            <td>{{ chardata[[field, ' Mod']|join] }}</td>
+            {% endif %}
+        </tr>
+    {% endif %}
+{% endfor %}
+</table>
+
 {% endblock %}

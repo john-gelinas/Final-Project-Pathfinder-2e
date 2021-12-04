@@ -6,8 +6,9 @@ from flask import Flask, flash, redirect, render_template, request, session
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from tempfile import mkdtemp
-from helpers import apology, login_required, sqlselect, scrub
+from helpers import apology, login_required, sqlselect, scrub, dictfactory
 from flask_session import Session
+from math import floor
 
 
 # Configure application
@@ -43,11 +44,20 @@ def index():
 @app.route('/characters')
 @login_required
 def characters():
-
     if request.method == "GET":
         user = session["user_id"]
         user = scrub(user)
+        query = "SELECT id FROM users WHERE username = '{}'".format(user)
+        playerid = sqlselect(query)[0][0]
         # get and display characters from db
+        con = sqlite3.connect('pathfinder.db')
+        con.row_factory = dictfactory
+        cur = con.cursor()
+        cur.execute("SELECT * FROM characters WHERE playerid = {}".format(playerid))
+        chardata = cur.fetchall()[0]
+        cur.close()
+        con.close()
+
         return render_template('characters.html', user=user)
 
     
@@ -60,10 +70,21 @@ def character(name):
         user = scrub(user)
         query = "SELECT id FROM users WHERE username = '{}'".format(user)
         playerid = sqlselect(query)[0][0]
-        query = "SELECT * FROM characters WHERE name = '{}' AND playerid = {}".format(name, playerid)
-        chardata = sqlselect(query)
+        con = sqlite3.connect('pathfinder.db')
+        con.row_factory = dictfactory
+        cur = con.cursor()
+        cur.execute("SELECT * FROM characters WHERE name = '{}' AND playerid = {}".format(name, playerid))
+        chardata = cur.fetchall()[0]
+        cur.close()
+        con.close()
+        chardata["Str Mod"] = floor((chardata["Str"] - 10)/2)
+        chardata["Dex Mod"] = floor((chardata["Dex"] - 10)/2)
+        chardata["Con Mod"] = floor((chardata["Con"] - 10)/2)
+        chardata["Int Mod"] = floor((chardata["Int"] - 10)/2)
+        chardata["Wis Mod"] = floor((chardata["Wis"] - 10)/2)
+        chardata["Cha Mod"] = floor((chardata["Cha"] - 10)/2)
 
-        return render_template("viewcharacter.html", characterdata = chardata)
+        return render_template("viewcharacter.html", chardata = chardata)
 
     if request.method == "POST":
         return
@@ -83,6 +104,7 @@ def edit():
         #pass form to db, display character
         chardata = dict()
         chardata["name"] = request.form.get("name")
+        chardata["class"] = request.form.get("class")
         chardata["str"] = request.form.get("str")
         chardata["dex"] = request.form.get("dex")
         chardata["con"] = request.form.get("con")
@@ -91,12 +113,11 @@ def edit():
         chardata["cha"] = request.form.get("cha")
         chardata["level"] = request.form.get("level")
         chardata["backstory"] = request.form.get("backstory")
-        app.logger.info(chardata["name"])    
         #add data to database
         #connect db
         con = sqlite3.connect('pathfinder.db')
         cur = con.cursor()
-        cur.execute("INSERT INTO characters (playerid, name, str, dex, con, int, wis, cha, level, backstory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (playerid, chardata["name"], chardata["str"], chardata["dex"], chardata["con"], chardata["int"], chardata["wis"], chardata["cha"], chardata["level"], chardata["backstory"]))
+        cur.execute("INSERT INTO characters (playerid, Name, Class, Str, Dex, Con, Int, Wis, Cha, Level, Backstory) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (playerid, chardata["name"], chardata["class"], chardata["str"], chardata["dex"], chardata["con"], chardata["int"], chardata["wis"], chardata["cha"], chardata["level"], chardata["backstory"]))
         con.commit()
         cur.close
         con.close
