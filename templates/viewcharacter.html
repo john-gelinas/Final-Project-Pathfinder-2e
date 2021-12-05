@@ -4,21 +4,46 @@
     {{ chardata.name }}
 {% endblock %}
 
+{% block script %}
+<!-- Allow for hiding of edit column -->
+<script>
+function editcolumn() {
+    var col = document.getElementsByClassName("editcolumn")
+    var i;
+    for (i = 0; i < col.length; i++) {
+        if (col[i].style.visibility == "visible") {
+            col[i].style.visibility == "hidden";
+        }
+        else {
+            col[i].style.visibility == "visible";
+        }
+    }
+}
+</script>
+
+
+{% endblock %}
+
 {% block main %}
 
 <table class = "table table-striped table-hover table-active">
+    <colgroup>
+        <col>
+        <col>
+        <col id = "editcolumn" class = "editcolumn">
+    </colgroup>
     <thead class="thead-dark">
         <tr>
             <th>Name</th>
             <th>{{ chardata["Name"] }}</th>
-            <th></th>
+            <th class = "editcolumn"><button onclick="editcolumn()" class = "btn btn-secondary">Show/Hide</button></th>
         </tr>
     </thead>
 {% for field in chardata %}
     {% if loop.index > 3 and loop.index < 13 %}
         <tr>
-            <td>{{ field }}: </td>
-            <td>
+            <th scope="row" style = "width: 15%">{{ field }} </th>
+            <td style = "width: 40%">
                 {{ chardata[field]|string }}
                 {#Add modifiers#}
                 {% if field|length == 3 %}
@@ -33,10 +58,15 @@
                 )
                 {% endif %}
             </td>
-            <td>
-                <form>
-                    <input type = "text" id = {{ field }} name = {{ field }}>
+            <td style = "width: 300px" class = "editcolumn">
+                <form action= "/character/{{chardata.Name}}" method="post">
+                    {%if field == "Backstory" %}
+                    <textarea rows="4" cols="20" id = {{field}} name = {{field}} >{{chardata[field]|string}}</textarea>
+                    {% else %}
+                    <input type = "text" id = {{field}} name = {{field}} value = "{{chardata[field]|string}}">
+                    {% endif %}
                     <button class = "btn btn-secondary" type = "submit">Edit</button>
+                    <input type = "hidden" name = "field" value = "{{field}}">
                 </form>
             </td>            
         </tr>

@@ -88,9 +88,21 @@ def character(name):
         return render_template("viewcharacter.html", chardata = chardata)
 
     if request.method == "POST":
-        
-        
-        return
+        field = request.form.get("field")
+        field = scrub(field)
+        value = request.form.get(field)
+        value = scrub(value)
+        app.logger.info(field)    
+        app.logger.info(value)    
+        con = sqlite3.connect('pathfinder.db') 
+        cur = con.cursor()
+        query = "UPDATE characters SET '{}' = '{}' WHERE Name = '{}' AND playerid = '{}'".format(field, value, name, playerid)
+        cur.execute(query)
+        con.commit()
+        cur.close()
+        con.close()
+        charpage = "/character/" + name
+        return redirect(charpage)
 
 
 @app.route('/newcharacter', methods=["GET", "POST"])

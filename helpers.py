@@ -21,7 +21,7 @@ def login_required(f):
     return decorated_function
 
 def scrub(table_name):
-    return ''.join( chr for chr in table_name if chr.isalnum() or chr == " " )
+    return ''.join( chr for chr in table_name if chr.isalnum() or chr == " " or chr == "." )
 # From Donald Miner for scrubbing special characters from https://stackoverflow.com/questions/3247183/variable-table-name-in-sqlite
 
 def sqlselect(query):
