@@ -7,7 +7,11 @@
 {% block main %}
     <a href="/newcharacter">New Character</a>
     <h1>Characters:</h1>
-    {% for character in chardata %}
-        <a href = "/character/{{ chardata.name }}">{{chardata.name}}</a>
+    <table class = "table table-light">
+    {% for name in chardata %}
+        <tr>
+            <td><h4><a href = "/character/{{ name[0] }}">{{name[0]}}</a></h4></td>
+        </tr>
     {% endfor %}
+    </table>
 {% endblock %}

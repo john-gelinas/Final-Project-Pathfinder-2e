@@ -6,17 +6,39 @@
 
 {% block main %}
 
-<table>
+<table class = "table table-striped table-hover table-active">
+    <thead class="thead-dark">
+        <tr>
+            <th>Name</th>
+            <th>{{ chardata["Name"] }}</th>
+            <th></th>
+        </tr>
+    </thead>
 {% for field in chardata %}
-    {% if loop.index > 2 and loop.index < 13 %}
+    {% if loop.index > 3 and loop.index < 13 %}
         <tr>
             <td>{{ field }}: </td>
-            <td>{{ chardata[field] }}</td>
-            <!-- Add modifiers -->
-            {% if field|length == 3 %}
-            <td>{{ [field, ' Modifier']|join }}: </td>
-            <td>{{ chardata[[field, ' Mod']|join] }}</td>
-            {% endif %}
+            <td>
+                {{ chardata[field]|string }}
+                {#Add modifiers#}
+                {% if field|length == 3 %}
+                (
+                    {% if chardata[[field, ' Mod']|join] > 0 %}
+                        {{ ['+',chardata[[field, ' Mod']|join]]|join }}
+                    {% elif chardata[[field, ' Mod']|join] == 0 %}
+                        {{ [' ',chardata[[field, ' Mod']|join]]|join }}
+                    {% else %}
+                        {{ ['-',chardata[[field, ' Mod']|join]]|join }}
+                    {% endif %}
+                )
+                {% endif %}
+            </td>
+            <td>
+                <form>
+                    <input type = "text" id = {{ field }} name = {{ field }}>
+                    <button class = "btn btn-secondary" type = "submit">Edit</button>
+                </form>
+            </td>            
         </tr>
     {% endif %}
 {% endfor %}

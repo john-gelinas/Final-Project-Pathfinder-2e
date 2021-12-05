@@ -3,6 +3,7 @@ import os
 import sys
 import sqlite3
 from flask import Flask, flash, redirect, render_template, request, session
+from flask.helpers import get_flashed_messages
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
 from tempfile import mkdtemp
@@ -51,32 +52,32 @@ def characters():
         playerid = sqlselect(query)[0][0]
         # get and display characters from db
         con = sqlite3.connect('pathfinder.db')
-        con.row_factory = dictfactory
         cur = con.cursor()
-        cur.execute("SELECT * FROM characters WHERE playerid = {}".format(playerid))
-        chardata = cur.fetchall()[0]
+        cur.execute("SELECT Name FROM characters WHERE playerid = {}".format(playerid))
+        chardata = cur.fetchall()
         cur.close()
         con.close()
-
-        return render_template('characters.html', user=user)
+        app.logger.info(chardata)    
+        return render_template('characters.html', chardata=chardata)
 
     
 @app.route('/character/<name>', methods=["GET", "POST"])
 def character(name):
+    # get character data from database
+    user = session["user_id"]
+    name = scrub(name)
+    user = scrub(user)
+    query = "SELECT id FROM users WHERE username = '{}'".format(user)
+    playerid = sqlselect(query)[0][0]
+    con = sqlite3.connect('pathfinder.db')
+    con.row_factory = dictfactory
+    cur = con.cursor()
+    cur.execute("SELECT * FROM characters WHERE name = '{}' AND playerid = {}".format(name, playerid))
+    chardata = cur.fetchall()[0]
+    cur.close()
+    con.close()
+    
     if request.method == "GET":
-        # get character data from database
-        user = session["user_id"]
-        name = scrub(name)
-        user = scrub(user)
-        query = "SELECT id FROM users WHERE username = '{}'".format(user)
-        playerid = sqlselect(query)[0][0]
-        con = sqlite3.connect('pathfinder.db')
-        con.row_factory = dictfactory
-        cur = con.cursor()
-        cur.execute("SELECT * FROM characters WHERE name = '{}' AND playerid = {}".format(name, playerid))
-        chardata = cur.fetchall()[0]
-        cur.close()
-        con.close()
         chardata["Str Mod"] = floor((chardata["Str"] - 10)/2)
         chardata["Dex Mod"] = floor((chardata["Dex"] - 10)/2)
         chardata["Con Mod"] = floor((chardata["Con"] - 10)/2)
@@ -87,6 +88,8 @@ def character(name):
         return render_template("viewcharacter.html", chardata = chardata)
 
     if request.method == "POST":
+        
+        
         return
 
 
@@ -103,16 +106,16 @@ def edit():
         playerid = sqlselect(query)[0][0]    
         #pass form to db, display character
         chardata = dict()
-        chardata["name"] = request.form.get("name")
-        chardata["class"] = request.form.get("class")
-        chardata["str"] = request.form.get("str")
-        chardata["dex"] = request.form.get("dex")
-        chardata["con"] = request.form.get("con")
-        chardata["int"] = request.form.get("int")
-        chardata["wis"] = request.form.get("wis")
-        chardata["cha"] = request.form.get("cha")
-        chardata["level"] = request.form.get("level")
-        chardata["backstory"] = request.form.get("backstory")
+        chardata["name"] = request.form.get("Name")
+        chardata["class"] = request.form.get("Class")
+        chardata["str"] = request.form.get("Str")
+        chardata["dex"] = request.form.get("Dex")
+        chardata["con"] = request.form.get("Con")
+        chardata["int"] = request.form.get("Int")
+        chardata["wis"] = request.form.get("Wis")
+        chardata["cha"] = request.form.get("Cha")
+        chardata["level"] = request.form.get("Level")
+        chardata["backstory"] = request.form.get("Backstory")
         #add data to database
         #connect db
         con = sqlite3.connect('pathfinder.db')
@@ -158,7 +161,7 @@ def login():
 
         # Remember which user has logged in
         session["user_id"] = rows[0][1]
-
+        flash("Logged In")
         # Redirect user to home page
         return redirect("/")
 
