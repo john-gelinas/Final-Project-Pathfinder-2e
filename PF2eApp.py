@@ -42,6 +42,10 @@ def index():
     user = session["user_id"]
     return render_template('index.html', user=user)
 
+@app.route('/home')
+def home():
+    return redirect('/')
+
 @app.route('/characters')
 @login_required
 def characters():
@@ -85,7 +89,14 @@ def character(name):
         chardata["Wis Mod"] = floor((chardata["Wis"] - 10)/2)
         chardata["Cha Mod"] = floor((chardata["Cha"] - 10)/2)
 
-        return render_template("viewcharacter.html", chardata = chardata)
+        proficiencies = {}
+        proficiencies["Untrained"] = 0
+        proficiencies["Trained"] = chardata["Level"] + 2
+        proficiencies["Expert"] = chardata["Level"] + 4
+        proficiencies["Master"] = chardata["Level"] + 6
+        proficiencies["Legendary"] = chardata["Level"] + 8
+
+        return render_template("viewcharacter.html", chardata = chardata, proficiencies = proficiencies)
 
     if request.method == "POST":
         field = request.form.get("field")
@@ -179,6 +190,10 @@ def login():
 
     if request.method == "GET":
         return render_template("login.html")
+
+@app.route("/dice")
+def dice():
+    return render_template("dice.html")
 
 
 @app.route("/logout")

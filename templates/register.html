@@ -7,13 +7,22 @@
 {% block main %}
     <form action="/register" method="post">
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="username" type="text">
+            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
+        </div>
+        <div style="line-height:100%;">
+            <br>
         </div>
         <div class="form-group">
-            <input class="form-control" name="password" placeholder="password" type="password">
+            <input class="form-control" name="password" placeholder="Password" type="password">
+        </div>
+        <div style="line-height:50%;">
+            <br>
         </div>
         <div class="form-group">
-            <input class="form-control" name="confirmation" placeholder="retype password" type="password">
+            <input class="form-control" name="confirmation" placeholder="Retype Password" type="password">
+        </div>
+        <div style="line-height:100%;">
+            <br>
         </div>
         <button class="btn btn-primary" type="submit">Register</button>
     </form>

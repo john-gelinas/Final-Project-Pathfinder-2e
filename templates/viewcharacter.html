@@ -8,14 +8,12 @@
 <!-- Allow for hiding of edit column -->
 <script>
 function editcolumn() {
-    var col = document.getElementsByClassName("editcolumn")
-    var i;
-    for (i = 0; i < col.length; i++) {
+    var col = document.getElementsByClassName("editcolumn");
+    for (var i = 0; i < col.length; ++i) {
         if (col[i].style.visibility == "visible") {
-            col[i].style.visibility == "hidden";
-        }
-        else {
-            col[i].style.visibility == "visible";
+            col[i].style.visibility = "collapse";
+        } else {
+            col[i].style.visibility = "visible";
         }
     }
 }
@@ -30,48 +28,60 @@ function editcolumn() {
     <colgroup>
         <col>
         <col>
-        <col id = "editcolumn" class = "editcolumn">
+        <col class = "editcolumn border-0" id = "col" style = "width: 300px; visibility: hidden">
     </colgroup>
     <thead class="thead-dark">
         <tr>
             <th>Name</th>
             <th>{{ chardata["Name"] }}</th>
-            <th class = "editcolumn"><button onclick="editcolumn()" class = "btn btn-secondary">Show/Hide</button></th>
+            <th class = "editcolumn" style = "visibility: hidden"></th>
         </tr>
     </thead>
-{% for field in chardata %}
-    {% if loop.index > 3 and loop.index < 13 %}
-        <tr>
-            <th scope="row" style = "width: 15%">{{ field }} </th>
-            <td style = "width: 40%">
-                {{ chardata[field]|string }}
-                {#Add modifiers#}
-                {% if field|length == 3 %}
-                (
-                    {% if chardata[[field, ' Mod']|join] > 0 %}
-                        {{ ['+',chardata[[field, ' Mod']|join]]|join }}
-                    {% elif chardata[[field, ' Mod']|join] == 0 %}
-                        {{ [' ',chardata[[field, ' Mod']|join]]|join }}
-                    {% else %}
-                        {{ ['-',chardata[[field, ' Mod']|join]]|join }}
+    {% for field in chardata %}
+        {% if loop.index > 3 and loop.index < 13 %}
+            <tr>
+                <th scope="row" style = "width: 15%">{{ field }} </th>
+                <td style = "width: 40%">
+                    {{ chardata[field]|string }}
+                    {#Add modifiers#}
+                    {% if field|length == 3 %}
+                    (
+                        {% if chardata[[field, ' Mod']|join] > 0 %}
+                            {{ ['+',chardata[[field, ' Mod']|join]]|join }}
+                        {% elif chardata[[field, ' Mod']|join] == 0 %}
+                            {{ [' ',chardata[[field, ' Mod']|join]]|join }}
+                        {% else %}
+                            {{ ['-',chardata[[field, ' Mod']|join]]|join }}
+                        {% endif %}
+                    )
                     {% endif %}
-                )
-                {% endif %}
-            </td>
-            <td style = "width: 300px" class = "editcolumn">
-                <form action= "/character/{{chardata.Name}}" method="post">
-                    {%if field == "Backstory" %}
-                    <textarea rows="4" cols="20" id = {{field}} name = {{field}} >{{chardata[field]|string}}</textarea>
-                    {% else %}
-                    <input type = "text" id = {{field}} name = {{field}} value = "{{chardata[field]|string}}">
-                    {% endif %}
-                    <button class = "btn btn-secondary" type = "submit">Edit</button>
-                    <input type = "hidden" name = "field" value = "{{field}}">
-                </form>
-            </td>            
-        </tr>
-    {% endif %}
-{% endfor %}
+                </td>
+                <td style = "visibility: hidden" class = "editcolumn">
+                    <form action= "/character/{{chardata.Name}}" method="post">
+                        {%if field == "Backstory" %}
+                        <textarea rows="4" cols="20" id = {{field}} name = {{field}} >{{chardata[field]|string}}</textarea>
+                        {% else %}
+                        <input type = "text" id = {{field}} name = {{field}} value = "{{chardata[field]|string}}">
+                        {% endif %}
+                        <button class = "btn btn-secondary" type = "submit">Edit</button>
+                        <input type = "hidden" name = "field" value = "{{field}}">
+                    </form>
+                </td>            
+            </tr>
+        {% endif %}
+    {% endfor %}
+    <thead>
+        <th colspan = "2" style = "text-align: center">Proficiencies</th>
+    </thead>
+    {% for name, prof in proficiencies.items() %}
+    <tr>
+        <td>{{name}}</td>
+        <td>{{prof}}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <button onclick="editcolumn()" class = "btn btn-secondary">Show/Hide Edits</button>
+    </tr>
 </table>
 
 {% endblock %}
