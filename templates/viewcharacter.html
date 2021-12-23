@@ -43,15 +43,13 @@ function editcolumn() {
                 <th scope="row" style = "width: 15%">{{ field }} </th>
                 <td style = "width: 40%">
                     {{ chardata[field]|string }}
-                    {#Add modifiers#}
+                    {#Add + modifiers (- are already displayed)#}
                     {% if field|length == 3 %}
                     (
                         {% if chardata[[field, ' Mod']|join] > 0 %}
                             {{ ['+',chardata[[field, ' Mod']|join]]|join }}
-                        {% elif chardata[[field, ' Mod']|join] == 0 %}
-                            {{ [' ',chardata[[field, ' Mod']|join]]|join }}
                         {% else %}
-                            {{ ['-',chardata[[field, ' Mod']|join]]|join }}
+                            {{ ['',chardata[[field, ' Mod']|join]]|join }}
                         {% endif %}
                     )
                     {% endif %}
