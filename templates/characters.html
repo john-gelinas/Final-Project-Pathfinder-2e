@@ -5,7 +5,6 @@
 {% endblock %}
 
 {% block main %}
-    <a href="/newcharacter">New Character</a>
     <h1>Characters:</h1>
     <table class = "table table-light">
     {% for name in chardata %}
@@ -14,4 +13,5 @@
         </tr>
     {% endfor %}
     </table>
+    <button class="btn btn-secondary"><a href="/newcharacter" style="text-decoration: none; color: white">New Character</a></button>
 {% endblock %}

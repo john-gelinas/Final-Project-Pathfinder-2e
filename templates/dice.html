@@ -1,7 +1,14 @@
 {% extends "layout.html" %}
 
 {% block script %}
+<script>
+    function roller(die) {
+        number = parseInt(die);
+        result = Math.floor(Math.random() * number) + 1;
+        document.getElementById("number").innerHTML = result;
+    }
 
+</script>
 
 
 {% endblock %}
@@ -12,5 +19,42 @@
 
 {% block main %}
     <h3> Click Dice to Roll </h3>
-    
+    <h4 id="result">Result:</h4><h4 id="number"></h4>
+        <div class="d-flex justify-content-center flex-wrap">
+            <div class="class=p-2">
+                <button onclick="roller(this.id)" id="20" class="btn btn-light"><img src="static/dtwenty.png" width="47" height="50" style="vertical-align:middle"></button>
+                <h4>D20</h4>
+            </div>
+            <div class="class=p-2">
+                <button onclick="roller(this.id)" id="12" class="btn btn-light"><img src="static/d12.png" width="47" height="50" style="vertical-align:middle"></button>
+                <h4>D12</h4>
+            </div>
+            <div class="class=p-2">
+                <button onclick="roller(this.id)" id="10" class="btn btn-light"><img src="static/d10.png" width="47" height="50" style="vertical-align:middle"></button>
+                <h4>D10</h4>
+            </div>
+            <div class="class=p-2">
+                <button onclick="roller(this.id)" id="8" class="btn btn-light"><img src="static/d8.png" width="47" height="50" style="vertical-align:middle"></button>
+                <h4>D8</h4>
+            </div>
+            <div class="class=p-2">
+                <button onclick="roller(this.id)" id="6" class="btn btn-light"><img src="static/d6.png" width="47" height="50" style="vertical-align:middle"></button>
+                <h4>D6</h4>
+            </div>
+            <div class="class=p-2">
+                <button onclick="roller(this.id)" id="4" class="btn btn-light"><img src="static/d4.png" width="47" height="50" style="vertical-align:middle"></button>
+                <h4>D4</h4>
+            </div>
+            <div>
+                <button onclick="roller(this.id)" id="2" class="btn btn-light"><img src="static/crown-coin.png" width="47" height="50" style="vertical-align:middle"></button>
+                <h4>D2</h4>
+            </div>
+            <div>
+                <button onclick="roller(this.id)" id="100" class="btn btn-light"><img src="static/d10.png" width="47" height="50" style="vertical-align:middle"><img src="static/d10.png" width="47" height="50" style="vertical-align:middle"></button>
+                <h4>D%</h4>
+            </div>
+        </tr>
+
+
+    </table>
 {% endblock %}
