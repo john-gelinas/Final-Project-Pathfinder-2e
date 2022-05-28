@@ -14,11 +14,11 @@ The app consists of multiple webpages linked together with a python flask app:
 * A page to view a character and also edit the fields of the character (javascript to show/hide the edit fields)
 * A new character page to create a new character from scratch, filling in all fields
 
-This project required that I learn some new techniques in order to execute this app. The first new experience for me was using VSCode, rather than CS50 IDE. The IDE is user friendly, but comes with lots more features and nuance to get used to. Additionally, I chose to develop my app in a virtual environment, to keep the packages and setup separate from any other projects in the future. I also needed to learn how to dynamically route URLs in flask to redirect to various characters without knowing the urls in advance. Because VSCode does not have CS50s libraries, I needed to find another way to execute sql commands on my database. I chose to use the sqlite python library. This requires connection and cursor objects and demanded some debugging due to the nature of these objects. One example of that required a workaround were the dynamic queries that needed to be SQL-injection resistant. The "?" syntax is not always supported with this library so another helper function was required to "scrub" user inputs of most special characters. 
-  
-Some other interesting features that took some time include the scripting to make the nav links "active". This required some checking of the current url to format the nav links correctlty. I also added navbar collapsing for mobile devices and messages with icons for login.
+I chose to develop my app in a virtual environment, to keep the packages and setup separate from any other projects in the future. URLs are dynamically routed in flask to redirect to various characters. I chose to use the sqlite python library to manipulate a local database. This requires connection and cursor objects to create, read, update, and delete. The dynamic queries also need to be SQL-injection resistant. The "?" syntax is not always supported with this library so another helper function was required to "scrub" user inputs of most special characters. 
 
-## How to Use
+Some other interesting features include the scripting to make the nav links "active". This required checking the current url to format the nav links correctlty. I also added navbar collapsing for mobile devices and messages with icons for login.
+
+## How to Run Locally
 
 `pip install requirements.txt`
 
