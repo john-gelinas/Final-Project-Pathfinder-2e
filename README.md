@@ -20,6 +20,6 @@ Some other interesting features include the scripting to make the nav links "act
 
 ## How to Run Locally
 
-`pip install requirements.txt`
+`pip install -r requirements.txt`
 
 `flask run`
