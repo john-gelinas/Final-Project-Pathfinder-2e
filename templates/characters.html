@@ -1,17 +1,20 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Characters
+Characters
 {% endblock %}
 
 {% block main %}
-    <h1>Characters:</h1>
-    <table class = "table table-light">
+<h1>Characters:</h1>
+<table class="table table-light">
     {% for name in chardata %}
-        <tr>
-            <td><h4><a href = "/character/{{ name[0] }}">{{name[0]}}</a></h4></td>
-        </tr>
+    <tr>
+        <td>
+            <h4><a href="/character/{{ name[0] }}">{{name[0]}}</a></h4>
+        </td>
+    </tr>
     {% endfor %}
-    </table>
-    <button class="btn btn-secondary"><a href="/newcharacter" style="text-decoration: none; color: white">New Character</a></button>
+</table>
+<button class="btn btn-secondary"><a href="/newcharacter" style="text-decoration: none; color: white">New
+        Character</a></button>
 {% endblock %}

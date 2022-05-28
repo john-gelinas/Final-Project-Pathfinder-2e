@@ -1,43 +1,44 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Characters
+Characters
 {% endblock %}
 
 {% block main %}
-    <h2> Edit Character </h2>
-    <form action="/newcharacter" method="post"> 
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Name" placeholder="Name" type="text">
-        </div>
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Class" placeholder="Class" type="text">
-        </div>
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Str" placeholder="Str" type="text">
-        </div>
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Dex" placeholder="Dex" type="text">
-        </div>
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Con" placeholder="Con" type="text">
-        </div>
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Int" placeholder="Int" type="text">
-        </div>
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Wis" placeholder="Wis" type="text">
-        </div>
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Cha" placeholder="Cha" type="text">
-        </div>
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="Level" placeholder="Level" type="text">
-        </div>
-        <div class="form-group">
-            <textarea id="backstory" class="form-control" name="Backstory" placeholder="Backstory" rows="4" cols="40"></textarea>
-        </div>
-        <button class="btn btn-primary" type="submit">Save</button>
-    </form>
+<h2> Edit Character </h2>
+<form action="/newcharacter" method="post">
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Name" placeholder="Name" type="text">
+    </div>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Class" placeholder="Class" type="text">
+    </div>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Str" placeholder="Str" type="text">
+    </div>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Dex" placeholder="Dex" type="text">
+    </div>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Con" placeholder="Con" type="text">
+    </div>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Int" placeholder="Int" type="text">
+    </div>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Wis" placeholder="Wis" type="text">
+    </div>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Cha" placeholder="Cha" type="text">
+    </div>
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="Level" placeholder="Level" type="text">
+    </div>
+    <div class="form-group">
+        <textarea id="backstory" class="form-control" name="Backstory" placeholder="Backstory" rows="4"
+            cols="40"></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Save</button>
+</form>
 
 {% endblock %}
