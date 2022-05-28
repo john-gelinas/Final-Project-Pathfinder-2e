@@ -1,7 +1,6 @@
 # Final-Project-Pathfinder-2e
 
 ![RPG App Demonstration](/RPG_App_Demo.gif)
-<img src="/RPG_App_Demo.gif" width="600" height="482" />
 
 #### Description:
 This app allows the user to create custom RPG characters in the style of the Pathfinder Second Edition system. The app is designed to let users log in and access their existing characters, create new characters, edit existing characters, and roll virtual dice. Characters and users are stored in sql databases. 
